@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Card Pulse</title>
+<meta name="description" content="RBI credit card data, Jan–Sep 2026: card issuance is outpacing card usage. A 90-day activation product proposal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:light}
+/* Layout: single reading column, statement-style data panels in mono; ink + cobalt with a signal amber */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --ink:#111a2e; --muted:#566079; --line:#d9deea;
+  --accent:#2747d0; --accent-soft:#e3e8fb; --signal:#c77700; --signal-soft:#fbefd9; --good:#13795b;
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem; --s6:2rem; --s7:3rem; --s8:4.5rem;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0c1220; --surface:#141c2e; --ink:#e7ebf4; --muted:#9aa5bd; --line:#26314a;
+  --accent:#8ea2ff; --accent-soft:#1d2850; --signal:#f0a742; --signal-soft:#3a2b12; --good:#4fc79c; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0c1220; --surface:#141c2e; --ink:#e7ebf4; --muted:#9aa5bd; --line:#26314a;
+  --accent:#8ea2ff; --accent-soft:#1d2850; --signal:#f0a742; --signal-soft:#3a2b12; --good:#4fc79c; color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.6; margin:0;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.wrap{max-width:1040px; margin:0 auto}
+h1,h2,h3{font-family:var(--f-display); line-height:1.12; text-wrap:balance; margin:0; letter-spacing:-.015em}
+h1{font-size:clamp(2.2rem, 5.5vw, 3.6rem); font-weight:700}
+h2{font-size:clamp(1.6rem, 3.4vw, 2.2rem); font-weight:650}
+h3{font-size:1.25rem; font-weight:650}
+p{margin:0; max-width:65ch}
+a{color:var(--accent); text-underline-offset:3px}
+a:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:4px}
+.eyebrow{font-family:var(--f-mono); font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+section{padding-block:var(--s8) 0}
+.sec-head{display:grid; gap:var(--s3); margin-bottom:var(--s6)}
+.chip{display:inline-flex; align-items:center; gap:.35em; font-family:var(--f-mono); font-size:.72rem; letter-spacing:.04em;
+  padding:.2rem .55rem; border-radius:999px; border:1px solid var(--line); color:var(--muted); background:var(--surface); white-space:nowrap}
+.chip.work{border-color:transparent; background:var(--accent-soft); color:var(--accent)}
+.chip.learn{border-color:transparent; background:var(--signal-soft); color:var(--signal)}
+.btn{display:inline-flex; align-items:center; gap:.4rem; font:600 .92rem var(--f-body); padding:.6rem 1rem; border-radius:8px;
+  border:1px solid var(--accent); background:var(--accent); color:var(--bg); text-decoration:none; cursor:pointer}
+.btn.ghost{background:transparent; color:var(--accent)}
+.btn:hover{filter:brightness(1.08)}
+.chart{width:100%; height:auto; display:block}
+.chart text{fill:var(--muted); font-family:var(--f-mono); font-size:11px}
+.chart .grid{stroke:var(--line); stroke-width:1}
+.src{font-size:.8rem; color:var(--muted)}
+footer{padding-block:var(--s7); margin-top:var(--s8); border-top:1px solid var(--line); color:var(--muted); font-size:.85rem}
+@media (prefers-reduced-motion: no-preference){ .rise{animation:rise .6s ease-out both} @keyframes rise{from{transform:translateY(8px)}to{transform:none}} }
+
+:root{padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px)}
+.back{display:inline-block; padding-block:var(--s5); color:var(--muted); text-decoration:none; font-size:.92rem}
+.back:hover{color:var(--ink)}
+.phead{display:grid; gap:var(--s4); padding-block:var(--s4) var(--s6); border-bottom:1px solid var(--line)}
+.phead .lede{font-size:1.12rem; color:var(--muted)}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:var(--s5); padding-block:var(--s6)}
+.kpi{display:grid; gap:var(--s1); align-content:start}
+.kpi b{font-family:var(--f-mono); font-size:1.7rem; font-weight:600; color:var(--accent); line-height:1.1; font-variant-numeric:tabular-nums}
+.kpi.warn b{color:var(--signal)}
+.kpi span{font-size:.86rem; color:var(--muted)}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:var(--s5); display:grid; gap:var(--s3); min-width:0}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:var(--s5)}
+.prose{display:grid; gap:var(--s4)}
+.prose h2{margin-top:var(--s7)}
+.prose ul, .prose ol{margin:0; padding-left:1.2rem; display:grid; gap:var(--s2); max-width:68ch}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-size:.92rem; min-width:520px}
+th, td{text-align:left; padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+td.num{font-family:var(--f-mono); font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap}
+.callout{border-left:3px solid var(--signal); background:var(--signal-soft); padding:var(--s4) var(--s5); border-radius:0 8px 8px 0; max-width:72ch}
+.story{font-family:var(--f-mono); font-size:.88rem; background:var(--accent-soft); padding:var(--s3) var(--s4); border-radius:8px}
+@media (max-width:760px){ .grid2{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="https://abhinavspambox.github.io/">← Back to portfolio</a>
+  <header class="phead">
+    <div class="eyebrow">Project 01 · Activation · RBI card statistics, Jan–Sep 2026</div>
+    <h1>Banks are issuing credit cards faster than people use them</h1>
+    <p class="lede">India's credit card base kept growing through 2026, but spend per card did not keep pace. This project sizes the gap with RBI data and proposes a first-90-days activation journey that a card issuer could ship.</p>
+  </header>
+  <div class="kpis"><div class="kpi"><b>125.3 mn</b><span>cards outstanding, Sep 2026</span></div><div class="kpi"><b>+8.65 mn</b><span>cards added, Jan → Sep 2026</span></div><div class="kpi warn"><b>₹16,281</b><span>monthly spend per card, Sep 2026</span></div><div class="kpi warn"><b>−14.8%</b><span>spend per card, Sep 2026 vs Sep 2025</span></div></div>
+  
+  <div class="grid2">
+    <div class="panel"><h3>Cards outstanding</h3><p class="src">Millions, end of month</p><div id="a"></div></div>
+    <div class="panel"><h3>Spend per card</h3><p class="src">₹ per card per month = monthly spend ÷ cards outstanding</p><div id="b"></div></div>
+  </div>
+  <div class="prose">
+    <h2>What the data shows</h2>
+    <ul>
+      <li><b>Issuance is steady.</b> Cards outstanding rose from 116.65 million in January to 125.30 million in September 2026, up 7.4% in nine months.</li>
+      <li><b>Usage is not.</b> Monthly spend per card fell from ₹17,145 in January to ₹16,281 in September. Apart from the March year-end spike, it has stayed below ₹17,000 every month since April.</li>
+      <li><b>The year-on-year picture is sharper.</b> September 2026 spend fell 5.9% from a year earlier, the first annual decline since February 2021, while average spend per card fell 14.8% (RBI data via Moneycontrol).</li>
+      <li><b>Issuers differ a lot.</b> In April 2026 an HDFC Bank card averaged ₹21,977 of spend, 30% more than an ICICI Bank card at ₹16,927.</li>
+    </ul>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Issuer · Apr 2026</th><th style="text-align:right">Spend (₹ cr)</th><th style="text-align:right">Cards (mn)</th><th style="text-align:right">Spend per card</th><th style="text-align:right">Spend YoY</th></tr></thead>
+      <tbody>
+        <tr><td>HDFC Bank</td><td class="num">58,106</td><td class="num">26.44</td><td class="num">₹21,977</td><td class="num">+12.34%</td></tr>
+        <tr><td>SBI Card</td><td class="num">37,940</td><td class="num">22.24</td><td class="num">₹17,060</td><td class="num">+28.98%</td></tr>
+        <tr><td>ICICI Bank</td><td class="num">32,499</td><td class="num">19.20</td><td class="num">₹16,927</td><td class="num">−7.35%</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout"><b>Reading this carefully.</b> Card spend is seasonal. March carries year-end corporate and tax payments, and in 2026 part of the festive spending moved from September into October. That is why I compare the trend across months and the same month year on year, not one month against the next.</div>
+
+    <h2>The user problem</h2>
+    <p><b>Persona: Neha, 26, salaried, Pune.</b> She accepted a lifetime-free card through an app offer. She pays for groceries, auto rides and chai by scanning UPI QR codes from her debit account. The card stays in her wallet for the occasional online sale. She doesn't know her reward rate and worries about missing a due date.</p>
+    <p>For the bank, Neha is a cost: acquisition spend, a credit bureau pull and a card that earns almost nothing. RBI's 2022 card directions also mean a card left unactivated for 30 days needs her fresh consent to stay open, so the first weeks decide whether she becomes a customer at all.</p>
+
+    <h2>The product: a first-90-days activation journey</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Feature</th><th>What it does</th><th>Metric it moves</th></tr></thead>
+      <tbody>
+        <tr><td>First-spend nudge</td><td>In-app and SMS prompt within 7 days of delivery, tied to a small welcome cashback on the first three spends.</td><td>% of cards with a spend in 30 days</td></tr>
+        <tr><td>Pick-your-category welcome offer</td><td>Neha chooses groceries, fuel or food delivery for boosted rewards in month one, so the card fits a habit she already has.</td><td>Transactions per active card</td></tr>
+        <tr><td>Small-ticket rail</td><td>Where the issuer offers a RuPay variant, one-tap linking of the card to UPI for QR payments.</td><td>Share of everyday spend on card</td></tr>
+        <tr><td>Plain-language first bill</td><td>A first statement that explains due date, minimum due and interest in three lines, plus two reminders before the due date.</td><td>Early delinquency, complaint rate</td></tr>
+      </tbody>
+    </table></div>
+    <p class="story">As a new cardholder, I want to know what my card is good for in my first week, so that I use it for something I already buy.</p>
+    <p class="story">As a new cardholder, I want a clear reminder before my first due date, so that I never pay a late fee by accident.</p>
+
+    <h2>How I'd prioritise it</h2>
+    <p>Illustrative RICE scores using my own assumptions for a mid-sized issuer adding about 150,000 cards a quarter. The method matters more than the numbers.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Feature</th><th style="text-align:right">Reach / qtr</th><th style="text-align:right">Impact</th><th style="text-align:right">Confidence</th><th style="text-align:right">Effort (wks)</th><th style="text-align:right">RICE</th></tr></thead>
+      <tbody>
+        <tr><td>First-spend nudge</td><td class="num">150,000</td><td class="num">1</td><td class="num">80%</td><td class="num">3</td><td class="num">40,000</td></tr>
+        <tr><td>Pick-your-category offer</td><td class="num">150,000</td><td class="num">2</td><td class="num">50%</td><td class="num">8</td><td class="num">18,750</td></tr>
+        <tr><td>Plain-language first bill</td><td class="num">150,000</td><td class="num">0.5</td><td class="num">80%</td><td class="num">4</td><td class="num">15,000</td></tr>
+        <tr><td>Small-ticket rail</td><td class="num">60,000</td><td class="num">2</td><td class="num">50%</td><td class="num">10</td><td class="num">6,000</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>Success metrics</h2>
+    <ul>
+      <li><b>North star:</b> average spend per card in the first 90 days.</li>
+      <li><b>Input metrics:</b> 30-day activation rate, transactions per active card, share of cards with three or more spends in month one.</li>
+      <li><b>Guardrails:</b> 90-day delinquency rate, complaints per 10,000 new cards, reward cost per activated card.</li>
+    </ul>
+
+    <h2>Risks and trade-offs</h2>
+    <ul>
+      <li>Over-nudging annoys customers and can look like pushing debt. Cap messages and let customers opt out in one tap.</li>
+      <li>Welcome rewards attract cashback hunters who churn. Tie the offer to three spends across separate days, not one large spend.</li>
+      <li>Spend growth that comes with higher delinquency is not a win. The guardrails above are reviewed weekly with the credit risk team.</li>
+    </ul>
+
+    <h2 id="discovery">Discovery plan</h2>
+    <p>The data shows the gap; it doesn't show why. Before building anything, I would talk to 10 people who got a credit card in the last 12 months and rarely use it.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>I believe</th><th>How I'll test it</th><th>What would change my mind</th></tr></thead>
+      <tbody>
+        <tr><td>New cardholders default to UPI from their savings account out of habit</td><td>Interviews: walk through their last 10 payments</td><td>Most say they avoid the card on purpose (fear of debt), not by habit</td></tr>
+        <tr><td>People don't know what their card is good for</td><td>Ask them to name their reward rate and one benefit</td><td>Most can name both, yet still don't use it</td></tr>
+        <tr><td>Fear of missing a due date holds back first use</td><td>Ask what worries them about using the card</td><td>Fees or interest rarely come up</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Interview guide · 20 minutes</h3>
+    <ol>
+      <li><b>Screener:</b> got a credit card in the last 12 months; used it fewer than 3 times last month.</li>
+      <li>How did you end up with this card? Who suggested it?</li>
+      <li>Walk me through the last 10 things you paid for. How did you pay each time?</li>
+      <li>When did you last use the card? What made you pick it that time?</li>
+      <li>What do you get for using this card? (Don't prompt.)</li>
+      <li>What, if anything, worries you about using it?</li>
+      <li>What would make you reach for it at a grocery shop?</li>
+      <li>If the bank sent you one message this week, what would actually be useful?</li>
+    </ol>
+    <p class="src">Research status: not yet run. Findings and quotes will be added here.</p>
+
+    <h2>Method</h2>
+    <p>I compiled monthly cards outstanding and total spend for January–September 2026 from RBI's bank-wise card statistics as reported in the press, and calculated spend per card and a January-based index. The data and the script are in this folder (<span class="mono">data.csv</span>, <span class="mono">issuers_apr2026.csv</span>, <span class="mono">analysis.py</span>), each row with its source link. The same numbers are queried in SQL in the <a href="https://github.com/abhinavspambox/sql-workbench">data workbench</a>.</p>
+  </div>
+
+  <footer>
+    <p>Built by Abhinav Kumar Tarkar as a portfolio project. Data: RBI bank-wise ATM/POS/card statistics as reported by Business Standard, Angel One, Outlook Money, Tribune and Moneycontrol; CareEdge Ratings. Files in this folder: <span class="mono">data.csv</span>, <span class="mono">analysis.py</span>.</p>
+  </footer>
+</div>
+<script>
+/* Tiny dependency-free SVG charts. Colors come from CSS tokens so both themes work. */
+(function(){
+  var NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, parent){ var n=document.createElementNS(NS, tag); for(var k in attrs){ n.setAttribute(k, attrs[k]); } if(parent) parent.appendChild(n); return n; }
+  function txt(parent, x, y, s, anchor){ var t=el("text",{x:x,y:y,"text-anchor":anchor||"start"},parent); t.textContent=s; return t; }
+  function niceTicks(min, max, n){
+    var span=max-min||1, step=Math.pow(10, Math.floor(Math.log10(span/n))), err=span/n/step;
+    if(err>=7.5) step*=10; else if(err>=3.5) step*=5; else if(err>=1.5) step*=2;
+    var lo=Math.floor(min/step)*step, hi=Math.ceil(max/step)*step, out=[];
+    for(var v=lo; v<=hi+step/2; v+=step) out.push(+v.toFixed(6));
+    return out;
+  }
+  function fitW(host, o){ return o.width || Math.min(640, Math.max(300, host.clientWidth || 640)); }
+  function svgFor(host, w, h, label){ host.innerHTML=""; return el("svg",{viewBox:"0 0 "+w+" "+h, class:"chart", role:"img", "aria-label":label||""}, host); }
+
+  window.lineChart = function(host, o){
+    var W=fitW(host,o), H=o.height||260, m={t:16,r:o.right||60,b:28,l:o.left||44};
+    var all=[]; o.series.forEach(function(s){ all=all.concat(s.values); });
+    var ticks=niceTicks(o.min!=null?o.min:Math.min.apply(null,all), o.max!=null?o.max:Math.max.apply(null,all), o.ticks||4);
+    var y0=ticks[0], y1=ticks[ticks.length-1], n=o.labels.length;
+    var X=function(i){ return m.l + i*(W-m.l-m.r)/(n-1); }, Y=function(v){ return H-m.b - (v-y0)/(y1-y0)*(H-m.t-m.b); };
+    var svg=svgFor(host,W,H,o.label);
+    ticks.forEach(function(t){ el("line",{x1:m.l,x2:W-m.r,y1:Y(t),y2:Y(t),class:"grid"},svg); txt(svg,m.l-8,Y(t)+4,(o.fmt||String)(t),"end"); });
+    o.labels.forEach(function(l,i){ if(n<=10 || i%2===0) txt(svg,X(i),H-8,l,"middle"); });
+    o.series.forEach(function(s){
+      var d=s.values.map(function(v,i){ return (i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1); }).join(" ");
+      if(s.area){ el("path",{d:d+" L"+X(n-1)+" "+(H-m.b)+" L"+X(0)+" "+(H-m.b)+" Z", style:"fill:var("+s.color+");opacity:.10"},svg); }
+      el("path",{d:d, style:"fill:none;stroke:var("+s.color+");stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round"+(s.dash?";stroke-dasharray:5 5":"")},svg);
+      var lv=s.values[n-1];
+      el("circle",{cx:X(n-1),cy:Y(lv),r:4.5,style:"fill:var("+s.color+");stroke:var(--surface);stroke-width:2"},svg);
+      var t=txt(svg,X(n-1)+8,Y(lv)+4,(s.endFmt||o.endFmt||o.fmt||String)(lv)); t.setAttribute("style","fill:var("+s.color+");font-weight:600");
+    });
+  };
+
+  window.barChart = function(host, o){
+    var W=fitW(host,o), H=o.height||240, m={t:22,r:12,b:28,l:o.left||40};
+    var ticks=niceTicks(0, Math.max.apply(null,o.values), o.ticks||4), y1=ticks[ticks.length-1], n=o.values.length;
+    var bw=(W-m.l-m.r)/n, Y=function(v){ return H-m.b - v/y1*(H-m.t-m.b); };
+    var svg=svgFor(host,W,H,o.label);
+    ticks.forEach(function(t){ el("line",{x1:m.l,x2:W-m.r,y1:Y(t),y2:Y(t),class:"grid"},svg); txt(svg,m.l-8,Y(t)+4,(o.fmt||String)(t),"end"); });
+    o.values.forEach(function(v,i){
+      var hot = o.highlight!=null ? o.highlight===i : i===n-1;
+      el("rect",{x:m.l+i*bw+bw*.18, y:Y(v), width:bw*.64, height:H-m.b-Y(v), rx:3, style:"fill:var("+(hot?"--accent":"--line")+")"},svg);
+      if(hot || o.labelAll){ var t=txt(svg,m.l+i*bw+bw/2,Y(v)-6,(o.valFmt||o.fmt||String)(v),"middle"); if(hot) t.setAttribute("style","fill:var(--accent);font-weight:600"); }
+      txt(svg,m.l+i*bw+bw/2,H-8,o.labels[i],"middle");
+    });
+  };
+
+  window.hbarChart = function(host, o){
+    var W=fitW(host,o), rowH=o.rowH||40, lw=o.labelW||210, H=o.values.length*rowH+8, max=o.max||Math.max.apply(null,o.values);
+    var svg=svgFor(host,W,H,o.label);
+    o.values.forEach(function(v,i){
+      var y=i*rowH+6, hot=o.highlight===i, bw=(W-lw-70)*v/max;
+      var lt=txt(svg,0,y+rowH/2+1,o.labels[i]); lt.setAttribute("style","fill:var("+(hot?"--ink":"--muted")+");font-family:var(--f-body);font-size:13px"+(hot?";font-weight:600":""));
+      el("rect",{x:lw,y:y+6,width:W-lw-70,height:rowH-18,rx:3,style:"fill:var(--line);opacity:.45"},svg);
+      el("rect",{x:lw,y:y+6,width:Math.max(bw,2),height:rowH-18,rx:3,style:"fill:var("+(hot?"--signal":"--accent")+")"},svg);
+      var t=txt(svg,lw+bw+8,y+rowH/2+1,(o.fmt||String)(v)); t.setAttribute("style","fill:var("+(hot?"--signal":"--ink")+");font-weight:600");
+    });
+  };
+})();
+
+
+var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep"];
+var cards=[116.65,117.70,118.63,119.44,120.50,121.60,122.86,124.05,125.30];
+var spend=[2.00,1.77,2.19,1.97,2.02,2.01,2.08,2.02,2.04];
+var ppc=spend.map(function(s,i){return Math.round(s*1e12/(cards[i]*1e6));});
+lineChart(document.getElementById("a"),{labels:m,series:[{values:cards,color:"--accent",area:true}],min:114,max:126,fmt:function(v){return v;},endFmt:function(v){return v.toFixed(1);},label:"Cards outstanding in millions"});
+lineChart(document.getElementById("b"),{labels:m,series:[{values:ppc,color:"--signal"}],min:14000,max:19000,left:56,right:80,fmt:function(v){return "₹"+(v/1000)+"k";},endFmt:function(v){return "₹"+v.toLocaleString("en-IN");},label:"Spend per card in rupees"});
+
+</script>
+</body>
+</html>
